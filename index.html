@@ -1,0 +1,190 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <link rel="stylesheet" href="css/main.css">
+
+  <meta name="theme-color" content="#fafafa">
+  <style>
+    body {
+      background-color: #f1f1f1;
+    }
+    .logo {
+      position: absolute;
+      width: 300px;
+      height: 100px;
+      z-index: 1000000;
+      /* background: red; */
+      left: 8%;
+      top: 20%;
+    }
+    .emblem {
+      position: absolute;
+      left: 50%;
+      right: 0;
+      top: 25vh;
+      margin: 0 auto;
+      width: 30vh;
+      height: 30vh;
+      border-radius: 30%;
+      color: #000;
+      animation: spinZ 10s linear infinite;
+      text-align: center;
+    }
+    .emblem span {
+      position: absolute;
+      display: inline-block;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      text-transform: uppercase;
+      font-size: 3vh;
+      transition: all 0.5s cubic-bezier(0, 0, 0, 1);
+    }
+    @keyframes spinZ {
+      0% {
+        transform: rotateZ(-360deg);
+      }
+      100% {
+        transform: rotateZ(0deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <canvas id="canvas"></canvas>
+  <img src="./img/logo.svg" alt="Logo" class="logo">
+  <div class="emblem">CAN'T STOP WON'T STOP CAN'T STOP WON'T STOP </div>
+
+
+  <!--[if IE]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+
+  <!-- Add your site or application content here -->
+  <script src="js/vendor/modernizr-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.4.1.min.js"><\/script>')</script>
+  <script src="js/plugins.js"></script>
+  <script src="js/main.js"></script>
+
+  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+  <script>
+    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+    ga('create', 'UA-XXXXX-Y', 'auto'); ga('set','transport','beacon'); ga('send', 'pageview')
+  </script>
+  <script src="https://www.google-analytics.com/analytics.js" async></script>
+  <script>
+
+      let canvas = document.getElementById("canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let ctx = canvas.getContext("2d");
+      let $canvas = $("#canvas");
+      let canvasOffset = $canvas.offset();
+      let offsetX = canvasOffset.left;
+      let offsetY = canvasOffset.top;
+      let isDown = false;
+      let PI2 = Math.PI * 2;
+      let boulePat = new Image();
+      boulePat.src = "./img/hero.jpeg";
+      dragInitialImage();
+
+      let Emblem = {
+          init: function(el, str) {
+              let element = document.querySelector(el);
+              let text = str ? str : element.innerHTML;
+              element.innerHTML = '';
+              for (let i = 0; i < text.length; i++) {
+                  let letter = text[i];
+                  let span = document.createElement('span');
+                  let node = document.createTextNode(letter);
+                  let r = (360/text.length)*(i);
+                  let x = (Math.PI/text.length).toFixed(0) * (i);
+                  let y = (Math.PI/text.length).toFixed(0) * (i);
+                  span.appendChild(node);
+                  span.style.webkitTransform = 'rotateZ('+r+'deg) translate3d('+x+'px,'+y+'px,0)';
+                  span.style.transform = 'rotateZ('+r+'deg) translate3d('+x+'px,'+y+'px,0)';
+                  element.appendChild(span);
+              }
+          }
+      };
+
+      Emblem.init('.emblem');
+
+
+      window.addEventListener('resize', resizeCanvas, false);
+
+      function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          dragInitialImage();
+      }
+
+      function handleMouseDown(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          isDown = true;
+      }
+
+      function handleMouseUp(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          isDown = false;
+          ctx.save();
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.globalCompositeOperation = "destination-over";
+          ctx.restore();
+          dragInitialImage();
+      }
+
+      function handleMouseOut(e) {
+          e.preventDefault();
+          e.stopPropagation();
+          isDown = false;
+      }
+
+      function handleMouseMove(e) {
+          if (!isDown) {
+              return;
+          }
+          e.preventDefault();
+          e.stopPropagation();
+          mouseX = parseInt(e.clientX - offsetX);
+          mouseY = parseInt(e.clientY - offsetY);
+          ctx.drawImage(boulePat,mouseX-500/2,mouseY-500/2,500,500);
+      }
+
+      function dragInitialImage() {
+          ctx.drawImage(boulePat, window.innerWidth/2 - 500/2, window.innerHeight/2 - 500/2,500,500);
+      }
+
+      $("#canvas").mousedown(function (e) {
+          handleMouseDown(e);
+      });
+      $("#canvas").mousemove(function (e) {
+          handleMouseMove(e);
+      });
+      $("#canvas").mouseup(function (e) {
+          handleMouseUp(e);
+      });
+      $("#canvas").mouseout(function (e) {
+          handleMouseOut(e);
+      });
+  </script>
+</body>
+
+</html>
